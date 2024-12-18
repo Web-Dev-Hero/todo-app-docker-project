@@ -18,12 +18,13 @@ Ensure you have the following installed on your system:
 ├── requirements.txt          # Python dependencies for the Flask app
 ```
 
-## Services
+## Docker Compose Configuration
 
 The `docker-compose.yml` file defines the following services:
 
 ### 1. Flask App (`flask-app`)
 - **Build Context**: The current directory (`.`).
+- **Container Name**: `flask-app`.
 - **Exposed Port**: Maps port `5000` in the container to `5001` on the host machine.
 - **Environment Variables**:
   - `MYSQL_HOST`: Hostname of the MySQL service (`mysql`).
@@ -31,23 +32,27 @@ The `docker-compose.yml` file defines the following services:
   - `MYSQL_PASSWORD`: MySQL password (`root`).
   - `MYSQL_DB`: Database name (`todo_app`).
 - **Depends On**: Starts only after the MySQL service is healthy.
+- **Networks**: Part of the `two-tier` network for communication with MySQL.
 
 ### 2. MySQL (`mysql`)
 - **Image**: Uses the official `mysql:8.0` image.
+- **Container Name**: `mysql`.
 - **Exposed Port**: Maps port `3306` in the container to `3306` on the host machine.
 - **Environment Variables**:
   - `MYSQL_ROOT_PASSWORD`: Root password for MySQL (`root`).
   - `MYSQL_DATABASE`: Name of the database (`todo_app`).
 - **Volumes**: Data is persisted using the `mysql-data` volume.
 - **Health Check**: Ensures the MySQL service is healthy before the Flask app starts.
+  - **Command**: Uses `mysqladmin` to check the connection.
+  - **Interval**: 10 seconds.
+  - **Retries**: 5 attempts.
+  - **Start Period**: 30 seconds delay before the first check.
 
-## Networks
-
-A custom bridge network named `two-tier` is used for communication between the Flask app and the MySQL database.
-
-## Volumes
-
+### Volumes
 - `mysql-data`: Stores the MySQL database files to ensure data persistence.
+
+### Networks
+- `two-tier`: A custom bridge network for communication between the Flask app and the MySQL database.
 
 ## Usage
 
@@ -81,86 +86,24 @@ To stop the services, press `Ctrl+C` in the terminal or run:
 docker-compose down
 ```
 
-## Deploying LAMP Stack with Docker
+### Step 5: Persistent Data
 
-To set up a LAMP environment and deploy a PHP application, use the following Dockerfile and docker-compose configuration:
-
-### Dockerfile
-```dockerfile
-# Use Ubuntu as base image
-FROM ubuntu:22.04
-
-# Install Apache, MySQL client, PHP, and necessary extensions
-RUN apt update && apt install -y \
-    apache2 \
-    mysql-client \
-    php \
-    libapache2-mod-php \
-    php-mysql \
-    && apt clean
-
-# Enable Apache rewrite module
-RUN a2enmod rewrite
-
-# Set the working directory
-WORKDIR /var/www/html
-
-# Copy PHP application files (ensure index.php exists locally)
-COPY index.php /var/www/html/
-
-# Expose HTTP port
-EXPOSE 80
-
-# Start Apache service
-CMD ["apache2ctl", "-D", "FOREGROUND"]
-```
-
-### docker-compose.yml
-```yaml
-version: '3.9'
-
-services:
-  lamp:
-    build: .
-    container_name: lamp-server
-    ports:
-      - "8080:80"
-    volumes:
-      - ./index.php:/var/www/html/index.php
-    networks:
-      - lamp-network
-
-networks:
-  lamp-network:
-    driver: bridge
-```
-
-### Deploy PHP Application
-1. Create an `index.php` file with the following content:
-   ```php
-   <?php
-   echo "Welcome to your LAMP server on Docker!";
-   phpinfo();
-   ?>
-   ```
-
-2. Build and start the LAMP stack:
-   ```bash
-   docker-compose up --build
-   ```
-
-3. Access the application in your browser at:
-   ```
-   http://localhost:8080
-   ```
+The MySQL database data is stored in the `mysql-data` volume. This ensures that data is not lost when the container is stopped or removed.
 
 ## Troubleshooting
 
-- If the MySQL service is not starting correctly, check the logs:
-  ```bash
-  docker logs mysql
-  ```
-- If the Flask app is not connecting to the database, ensure the environment variables are correctly set in the `docker-compose.yml` file.
+- **MySQL Service Not Starting**:
+  - Check the MySQL logs using:
+    ```bash
+    docker logs mysql
+    ```
+
+- **Flask App Not Connecting to MySQL**:
+  - Ensure the environment variables in `docker-compose.yml` are correctly set.
+  - Verify the `MYSQL_HOST` matches the name of the MySQL service (`mysql`).
+
+- **Network Issues**:
+  - Ensure both services are part of the same network (`two-tier`).
 
 ## License
 
