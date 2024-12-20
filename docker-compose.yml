@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  flask-app:
+  flask-app-real:
     build: .
-    container_name: flask-app
+    container_name: flask-app-real
     ports:
       - "5001:5000"
     depends_on:
