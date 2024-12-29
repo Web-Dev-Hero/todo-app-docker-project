@@ -45,4 +45,4 @@ metadata:
   namespace: two-tier-ns
 data:
   MYSQL_USER: root
-  MYSQL_DB: mydb
+  MYSQL_DB: todo_app
