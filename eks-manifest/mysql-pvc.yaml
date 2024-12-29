@@ -1,14 +1,11 @@
 apiVersion: v1
-kind: PersistentVolume
+kind: PersistentVolumeClaim
 metadata:
-  name: mysql-pv
+  name: mysql-pvc
   namespace: two-tier-ns
 spec:
-  capacity:
-    storage: 256Mi
-  volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: /home/ubuntu/app/volumes
+  resources:
+    requests:
+      storage: 256Mi
