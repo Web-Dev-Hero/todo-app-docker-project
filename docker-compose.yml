@@ -24,6 +24,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      - ./todo_app.sql:/docker-entrypoint-initdb.d/todo_app.sql
       - mysql-data:/var/lib/mysql
     networks:
       - two-tier

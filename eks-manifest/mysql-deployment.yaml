@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mysql
-          image: nikhilpal1994/mysql:8.0
+          image: mysql:5.7
           ports:
             - containerPort: 3306
           env:
@@ -33,4 +33,21 @@ spec:
         - name: mysql-initdb
           configMap:
             name: mysql-initdb-config
+       
 
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: two-tier-ns
+data:
+  init.sql: |
+    CREATE DATABASE todo_app;
+    USE todo_app;
+
+    CREATE TABLE tasks (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      status BOOLEAN DEFAULT FALSE
+    );
