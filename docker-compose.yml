@@ -5,13 +5,13 @@ services:
     build: .
     container_name: flask-app-1
     ports:
-      - "5001:5000"
+      - "5000:5000"
     depends_on:
       - mysql
     environment:
       MYSQL_HOST: mysql
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
       MYSQL_DB: todo_app
     networks:
       - two-tier
@@ -21,15 +21,17 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: todo_app
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
     ports:
       - "3306:3306"
     volumes:
       - ./todo_app.sql:/docker-entrypoint-initdb.d/todo_app.sql
-      - mysql-data:/var/lib/mysql
+      - ./mysql-data:/var/lib/mysql
     networks:
       - two-tier
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
       retries: 5
       start_period: 30s
